@@ -49,7 +49,7 @@ func main() {
 		panic(err.Error())
 	}
 	configPath := filepath.Join(user.HomeDir, ConfigFile)
-	fmt.Printf("configPath = %v\n", configPath)
+	//fmt.Printf("configPath = %v\n", configPath)
 	f, err := os.Open(configPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v: %v\n", configPath, err)
