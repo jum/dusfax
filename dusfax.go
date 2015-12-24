@@ -12,6 +12,8 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"strings"
+	"unicode"
 
 	"gopkg.in/gomail.v2"
 )
@@ -82,6 +84,19 @@ func main() {
 	}
 	if len(*faxNumber) == 0 {
 		flag.Usage()
+	}
+	// massage the fax number to omit some special characters
+	*faxNumber = strings.Map(func(r rune) rune {
+		if unicode.IsSpace(r) {
+			return -1
+		}
+		if r == '-' || r == '/' || r == '(' || r == ')' {
+			return -1
+		}
+		return r
+	}, *faxNumber)
+	if (*faxNumber)[0] == '+' {
+		*faxNumber = "00" + (*faxNumber)[1:]
 	}
 	d := gomail.NewPlainDialer(conf.SMTPServer, 587, conf.UserName, conf.PassWord)
 	s, err := d.Dial()
