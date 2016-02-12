@@ -35,14 +35,6 @@ var (
 	faxNumber = flag.String("n", "", "fax number to use (required)")
 )
 
-func init() {
-	flag.StringVar(&conf.EMailAddr, "email", "", "the email address to send the email from")
-	flag.StringVar(&conf.SMTPServer, "smtp", "", "the smtp server to use")
-	flag.StringVar(&conf.UserName, "user", "", "user name for smtp auth")
-	flag.StringVar(&conf.PassWord, "pass", "", "password for smtp auth")
-	flag.StringVar(&conf.FaxSecret, "secret", "", "DUS.net fax secret")
-}
-
 func main() {
 	user, err := user.Current()
 	if err != nil {
@@ -61,13 +53,18 @@ func main() {
 		}
 		f.Close()
 	}
+	flag.StringVar(&conf.EMailAddr, "email", conf.EMailAddr, "the email address to send the email from")
+	flag.StringVar(&conf.SMTPServer, "smtp", conf.SMTPServer, "the smtp server to use")
+	flag.StringVar(&conf.UserName, "user", conf.UserName, "user name for smtp auth")
+	flag.StringVar(&conf.PassWord, "pass", conf.PassWord, "password for smtp auth")
+	flag.StringVar(&conf.FaxSecret, "secret", conf.FaxSecret, "DUS.net fax secret")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [flags] pdf_file_to_send\n", os.Args[0])
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
 	flag.Parse()
-	//fmt.Printf("conf %#v\n", conf)
+	//fmt.Printf("conf %+v\n", conf)
 	f, err = os.OpenFile(configPath, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0600)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v: %v\n", configPath, err)
