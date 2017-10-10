@@ -6,6 +6,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -19,11 +20,12 @@ import (
 )
 
 type Config struct {
-	EMailAddr  string
-	SMTPServer string
-	UserName   string
-	PassWord   string
-	FaxSecret  string
+	EMailAddr          string
+	SMTPServer         string
+	UserName           string
+	PassWord           string
+	FaxSecret          string
+	InsecureSkipVerify bool
 }
 
 const (
@@ -58,6 +60,7 @@ func main() {
 	flag.StringVar(&conf.UserName, "user", conf.UserName, "user name for smtp auth")
 	flag.StringVar(&conf.PassWord, "pass", conf.PassWord, "password for smtp auth")
 	flag.StringVar(&conf.FaxSecret, "secret", conf.FaxSecret, "DUS.net fax secret")
+	flag.BoolVar(&conf.InsecureSkipVerify, "insecure", conf.InsecureSkipVerify, "skip ssl certificate verification")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [flags] pdf_file_to_send\n", os.Args[0])
 		flag.PrintDefaults()
@@ -95,7 +98,10 @@ func main() {
 	if (*faxNumber)[0] == '+' {
 		*faxNumber = "00" + (*faxNumber)[1:]
 	}
-	d := gomail.NewPlainDialer(conf.SMTPServer, 587, conf.UserName, conf.PassWord)
+	d := gomail.NewDialer(conf.SMTPServer, 587, conf.UserName, conf.PassWord)
+	if conf.InsecureSkipVerify {
+		d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	}
 	s, err := d.Dial()
 	if err != nil {
 		panic(err)
